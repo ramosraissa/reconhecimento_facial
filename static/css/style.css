@@ -1,0 +1,1716 @@
+/* ==========================================================================
+   FaceGate ✿ — Tema Claro & Feminino
+   Paleta: #FFF5F9 → #F6F0FF (fundo), #FF6FAE (rosa), #B79CFF (lilás)
+   Status: #4ED8A5 (liberado), #FF6B8A (negado), #FFB88C (atenção)
+   Fontes: Fredoka (títulos) · Nunito (texto) · DM Mono (números/código)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   IMPORTAÇÃO DAS FONTES (via @import como fallback — principal está no HTML)
+   -------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap');
+
+/* --------------------------------------------------------------------------
+   VARIÁVEIS DE DESIGN
+   -------------------------------------------------------------------------- */
+:root {
+  /* Fundo */
+  --bg-main: #FFF5F9;
+  --bg-gradient: linear-gradient(140deg, #FFF5F9 0%, #F6F0FF 100%);
+
+  /* Cards */
+  --card-bg: #FFFFFF;
+  --card-bg-hover: #FFF0F6;
+  --card-border: #F8D7E7;
+  --card-shadow: 0 8px 30px rgba(255, 111, 174, 0.12);
+  --card-shadow-hover: 0 12px 40px rgba(255, 111, 174, 0.2);
+
+  /* Texto */
+  --text-main: #4A2B45;
+  --text-secondary: #9A7B92;
+  --text-muted: #C4A8BE;
+
+  /* Cores principais */
+  --color-rose: #FF6FAE;
+  --color-lilac: #B79CFF;
+  --color-rose-soft: rgba(255, 111, 174, 0.12);
+  --color-lilac-soft: rgba(183, 156, 255, 0.12);
+
+  /* Gradiente principal */
+  --gradient-main: linear-gradient(135deg, #FF6FAE 0%, #B79CFF 100%);
+  --gradient-main-soft: linear-gradient(135deg, rgba(255,111,174,0.15) 0%, rgba(183,156,255,0.15) 100%);
+
+  /* Status */
+  --color-green: #4ED8A5;
+  --color-green-bg: #E8FBF3;
+  --color-green-border: rgba(78, 216, 165, 0.35);
+  --color-green-glow: rgba(78, 216, 165, 0.18);
+
+  --color-red: #FF6B8A;
+  --color-red-bg: #FFECF0;
+  --color-red-border: rgba(255, 107, 138, 0.35);
+  --color-red-glow: rgba(255, 107, 138, 0.18);
+
+  --color-amber: #FFB88C;
+  --color-amber-bg: rgba(255, 184, 140, 0.15);
+  --color-amber-border: rgba(255, 184, 140, 0.45);
+
+  /* Fontes */
+  --font-title: 'Fredoka', 'Nunito', sans-serif;
+  --font-ui: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+
+  /* Layout */
+  --sidebar-width: 230px;
+  --border-radius-card: 24px;
+  --border-radius-btn: 999px;
+  --border-radius-input: 16px;
+  --transition-fast: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Transição suave de tema */
+  --theme-transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* ==========================================================================
+   MODO ESCURO — [data-theme="dark"]
+   Aplicado pelo JS em <html data-theme="dark">
+   Paleta: fundo #1B1325→#251833, cards #2A1D38, borda #46305A
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-main:    #1B1325;
+  --bg-gradient: linear-gradient(140deg, #1B1325 0%, #251833 100%);
+
+  --card-bg:          #2A1D38;
+  --card-bg-hover:    #321E45;
+  --card-border:      #46305A;
+  --card-shadow:      0 8px 30px rgba(0, 0, 0, 0.35);
+  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.5);
+
+  --text-main:      #F6E9F5;
+  --text-secondary: #B9A3C2;
+  --text-muted:     #7A5F88;
+
+  --color-rose:      #FF7EB6;
+  --color-lilac:     #C0AAFF;
+  --color-rose-soft: rgba(255, 126, 182, 0.14);
+  --color-lilac-soft: rgba(192, 170, 255, 0.14);
+
+  --gradient-main:      linear-gradient(135deg, #FF7EB6 0%, #C0AAFF 100%);
+  --gradient-main-soft: linear-gradient(135deg, rgba(255,126,182,0.18) 0%, rgba(192,170,255,0.18) 100%);
+
+  --color-green:        #5CE6B0;
+  --color-green-bg:     rgba(92, 230, 176, 0.12);
+  --color-green-border: rgba(92, 230, 176, 0.3);
+  --color-green-glow:   rgba(92, 230, 176, 0.2);
+
+  --color-red:        #FF7A96;
+  --color-red-bg:     rgba(255, 122, 150, 0.12);
+  --color-red-border: rgba(255, 122, 150, 0.3);
+  --color-red-glow:   rgba(255, 122, 150, 0.2);
+
+  --color-amber:        #FFB88C;
+  --color-amber-bg:     rgba(255, 184, 140, 0.12);
+  --color-amber-border: rgba(255, 184, 140, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   RESET
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --------------------------------------------------------------------------
+   UTILITÁRIO CRÍTICO: .hidden — usado extensivamente pelo JS
+   -------------------------------------------------------------------------- */
+.hidden {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   BASE
+   -------------------------------------------------------------------------- */
+body {
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tipografia utilitária */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   SIDEBAR — 230px, branca com sombra rosada
+   ========================================================================== */
+
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: #FFFFFF;
+  border-right: 1.5px solid var(--card-border);
+  box-shadow: 4px 0 24px rgba(255, 111, 174, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  padding: 28px 16px 24px;
+}
+
+.sidebar-header {
+  padding-bottom: 22px;
+  border-bottom: 1.5px solid var(--card-border);
+  margin-bottom: 20px;
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+/* Ícone do logo com gradiente rosa-lilás */
+.logo-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--gradient-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(255, 111, 174, 0.35);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+}
+
+.logo-subtitle {
+  font-size: 0.6rem;
+  letter-spacing: 1.4px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Navegação */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 15px;
+  border-radius: 16px;
+  background: transparent;
+  border: 1.5px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.93rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  position: relative;
+  width: 100%;
+}
+
+.nav-item:hover {
+  background: var(--gradient-main-soft);
+  border-color: var(--card-border);
+  color: var(--color-rose);
+}
+
+/* Item ativo: gradiente rosa-lilás, texto branco */
+.nav-item.active {
+  background: var(--gradient-main);
+  border-color: transparent;
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(255, 111, 174, 0.3);
+}
+
+.nav-icon {
+  flex-shrink: 0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Badge de contagem */
+.badge-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--card-border);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.nav-item.active .badge-count {
+  background: rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+}
+
+/* Rodapé da sidebar */
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.ai-info-card {
+  background: linear-gradient(135deg, #FFF5F9 0%, #F6F0FF 100%);
+  border: 1.5px solid var(--card-border);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ai-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.info-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.info-val {
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.ai-info-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-top: 9px;
+  border-top: 1.5px dashed var(--card-border);
+  margin-top: 2px;
+}
+
+/* Ponto pulsante verde-menta */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-green);
+  box-shadow: 0 0 10px var(--color-green);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(0.9); opacity: 0.75; }
+  50%       { transform: scale(1.25); opacity: 1; }
+}
+
+.status-text {
+  font-size: 0.73rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   CONTEÚDO PRINCIPAL
+   ========================================================================== */
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  padding: 36px 44px;
+  min-height: 100vh;
+  max-width: 1440px;
+}
+
+.tab-view {
+  display: none;
+  animation: fadeIn 0.28s ease-out;
+}
+
+.tab-view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cabeçalho de cada tela */
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.view-title {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.2px;
+  line-height: 1.15;
+}
+
+.view-subtitle {
+  font-size: 0.89rem;
+  color: var(--text-secondary);
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Cards genéricos */
+.card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--border-radius-card);
+  padding: 26px;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(255, 111, 174, 0.3);
+}
+
+.card-header-clean {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.card-subtag {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   BOTÕES
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--border-radius-btn);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all var(--transition-bounce);
+  white-space: nowrap;
+}
+
+/* Primário — gradiente rosa→lilás */
+.btn-primary {
+  background: var(--gradient-main);
+  color: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(255, 111, 174, 0.3);
+  border-color: transparent;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 111, 174, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secundário — fantasma rosado */
+.btn-secondary {
+  background: transparent;
+  border-color: var(--card-border);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background: var(--color-rose-soft);
+  border-color: rgba(255, 111, 174, 0.4);
+  color: var(--color-rose);
+}
+
+/* Sucesso — verde menta */
+.btn-success {
+  background: var(--color-green);
+  color: #1A4035;
+  font-weight: 800;
+  border-color: transparent;
+  box-shadow: 0 4px 14px var(--color-green-glow);
+}
+
+.btn-success:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(78, 216, 165, 0.35);
+}
+
+.btn-success:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Perigo — coral */
+.btn-danger {
+  background: var(--color-red-bg);
+  color: var(--color-red);
+  border-color: var(--color-red-border);
+}
+
+.btn-danger:hover {
+  background: var(--color-red);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px var(--color-red-glow);
+}
+
+/* Tamanhos */
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 1rem;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-xs {
+  padding: 5px 13px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+}
+
+/* ==========================================================================
+   ALERTA GLOBAL DE CÂMERA
+   ========================================================================== */
+
+.alert-banner {
+  background: var(--color-amber-bg);
+  border: 1.5px solid var(--color-amber-border);
+  color: #7A4A18;
+  padding: 13px 20px;
+  border-radius: 16px;
+  margin-bottom: 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  font-size: 0.89rem;
+  font-weight: 600;
+  box-shadow: 0 4px 18px rgba(255, 184, 140, 0.18);
+}
+
+.alert-banner svg {
+  flex-shrink: 0;
+  color: var(--color-amber);
+  margin-top: 1px;
+}
+
+/* Garante que .hidden sobrescreve o display:flex acima */
+.alert-banner.hidden,
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   TELA 1: ACESSO — Grid de monitoramento
+   ========================================================================== */
+
+.acesso-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 26px;
+  align-items: start;
+}
+
+/* Card que envolve o vídeo */
+.webcam-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--border-radius-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--card-shadow);
+}
+
+/* Container do vídeo — borda em gradiente rosa-lilás */
+.video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Borda gradiente via pseudo-elemento abaixo */
+  background: var(--gradient-main);
+  padding: 3px;
+  box-shadow: 0 8px 32px rgba(255, 111, 174, 0.22);
+}
+
+/* Camada interna escura para o vídeo */
+.video-container::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 25px;
+  background: #1a0d15;
+  z-index: 0;
+}
+
+.video-container video {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  transform: scaleX(-1);
+}
+
+.video-container canvas {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  pointer-events: none;
+  z-index: 5;
+  transform: scaleX(-1);
+  border-radius: 24px;
+}
+
+/* Laser de varredura — cor rosa */
+.scanner-laser {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 111, 174, 0.9) 40%,
+    #FF6FAE 50%,
+    rgba(255, 111, 174, 0.9) 60%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px rgba(255, 111, 174, 0.7), 0 0 24px rgba(255, 111, 174, 0.3);
+  opacity: 0.85;
+  animation: scan-line 3s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 4;
+  border-radius: 2px;
+}
+
+@keyframes scan-line {
+  0%   { top: 8px; }
+  100% { bottom: 8px; top: calc(100% - 8px); }
+}
+
+/* Pill de status ao vivo */
+.camera-status-pill {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 111, 174, 0.25);
+  padding: 5px 13px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.73rem;
+  color: var(--text-main);
+  font-weight: 700;
+  z-index: 6;
+  box-shadow: 0 2px 12px rgba(255, 111, 174, 0.15);
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-green);
+  box-shadow: 0 0 8px var(--color-green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.webcam-footer-info {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 2px 0;
+  font-weight: 600;
+}
+
+/* Coluna dos 3 cards da direita */
+.acesso-cards-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── CARD 1: RESULTADO ─────────────────────────────────────── */
+.card-resultado {
+  transition: all 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.resultado-body {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.resultado-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  background: var(--gradient-main-soft);
+  border: 1.5px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: all 0.35s ease;
+}
+
+.resultado-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.resultado-badge {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  transition: color 0.3s ease;
+  letter-spacing: 0.3px;
+}
+
+.resultado-nome {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.resultado-motivo {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Estado: ACESSO LIBERADO */
+.card-resultado.state-liberado {
+  border-color: var(--color-green-border);
+  background: linear-gradient(135deg, var(--color-green-bg) 0%, #FFFFFF 65%);
+}
+.card-resultado.state-liberado .resultado-icon-wrapper {
+  background: var(--color-green-bg);
+  border-color: var(--color-green);
+  color: var(--color-green);
+  box-shadow: 0 0 22px var(--color-green-glow);
+}
+.card-resultado.state-liberado .resultado-badge {
+  color: #239E73;
+}
+.card-resultado.state-liberado .resultado-nome {
+  color: var(--text-main);
+}
+
+/* Estado: ACESSO NEGADO */
+.card-resultado.state-negado {
+  border-color: var(--color-red-border);
+  background: linear-gradient(135deg, var(--color-red-bg) 0%, #FFFFFF 65%);
+}
+.card-resultado.state-negado .resultado-icon-wrapper {
+  background: var(--color-red-bg);
+  border-color: var(--color-red);
+  color: var(--color-red);
+  box-shadow: 0 0 22px var(--color-red-glow);
+}
+.card-resultado.state-negado .resultado-badge {
+  color: var(--color-red);
+}
+
+/* Estado: ATENÇÃO (âmbar/pêssego) */
+.card-resultado.state-amber {
+  border-color: var(--color-amber-border);
+  background: linear-gradient(135deg, var(--color-amber-bg) 0%, #FFFFFF 65%);
+}
+.card-resultado.state-amber .resultado-icon-wrapper {
+  background: var(--color-amber-bg);
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+}
+.card-resultado.state-amber .resultado-badge {
+  color: #B06A20;
+}
+
+/* ── CARD 2: BARRA DE DISTÂNCIA ───────────────────────────── */
+.metric-highlight {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.distance-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.distance-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.71rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Rótulo central "Limiar: 0.50" em lilás */
+.threshold-label-center {
+  color: var(--color-lilac);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.distance-track-container {
+  position: relative;
+  padding: 12px 0;
+}
+
+/* Trilho — rosa bem claro */
+.distance-track {
+  height: 13px;
+  background: #FFE8F3;
+  border-radius: 999px;
+  position: relative;
+  border: 1.5px solid rgba(255, 111, 174, 0.2);
+  overflow: visible;
+}
+
+/* Preenchimento gradiente */
+.distance-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #FF6FAE, #B79CFF);
+  border-radius: 999px;
+  transition: width 0.38s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease;
+}
+
+.distance-fill.fill-green {
+  background: linear-gradient(90deg, #4ED8A5, #7FEBB5);
+  box-shadow: 0 0 12px var(--color-green-glow);
+}
+
+.distance-fill.fill-red {
+  background: linear-gradient(90deg, #FF6B8A, #FFB79C);
+  box-shadow: 0 0 12px var(--color-red-glow);
+}
+
+/* Marcador fixo em 50% — lilás */
+.threshold-marker {
+  position: absolute;
+  top: -13px;
+  bottom: -13px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.marker-flag {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: var(--color-lilac);
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-bottom: 3px;
+  box-shadow: 0 2px 8px rgba(183, 156, 255, 0.4);
+}
+
+.marker-line {
+  width: 2px;
+  flex: 1;
+  background: var(--color-lilac);
+  box-shadow: 0 0 6px rgba(183, 156, 255, 0.5);
+  border-radius: 2px;
+}
+
+.distance-legend {
+  display: flex;
+  gap: 18px;
+  font-size: 0.73rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot-legend {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-green { background: var(--color-green); box-shadow: 0 0 6px var(--color-green-glow); }
+.dot-red   { background: var(--color-red);   box-shadow: 0 0 6px var(--color-red-glow); }
+
+/* ── CARD 3: EMBEDDING ────────────────────────────────────── */
+.flex-align {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Badge "128-d" em lilás suave */
+.badge-dim {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  background: var(--color-lilac-soft);
+  border: 1.5px solid rgba(183, 156, 255, 0.3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--color-lilac);
+  font-weight: 600;
+}
+
+/* Canvas do espectro */
+.embedding-canvas-box {
+  width: 100%;
+  height: 48px;
+  background: #FFF0F8;
+  border-radius: 14px;
+  border: 1.5px solid var(--card-border);
+  overflow: hidden;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.embedding-canvas-box canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Box de texto do embedding */
+.embedding-code-box {
+  background: #FFF5FA;
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  max-height: 58px;
+  overflow-y: auto;
+  word-break: break-all;
+}
+
+/* ==========================================================================
+   TELA 2: CADASTRO
+   ========================================================================== */
+
+.cadastro-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 26px;
+  align-items: start;
+}
+
+.cadastro-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Grupo de formulário */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* Input — cantos bem arredondados, foco rosa */
+.form-input {
+  background: #FFF5F9;
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--border-radius-input);
+  padding: 13px 18px;
+  font-family: var(--font-ui);
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.form-input:focus {
+  border-color: var(--color-rose);
+  box-shadow: 0 0 0 4px rgba(255, 111, 174, 0.12);
+  background: #FFFFFF;
+}
+
+/* Container do vídeo de cadastro — mesma borda gradiente */
+.cad-video-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-main);
+  padding: 3px;
+  box-shadow: 0 8px 28px rgba(255, 111, 174, 0.2);
+}
+
+.cad-video-box::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 25px;
+  background: #1a0d15;
+  z-index: 0;
+}
+
+.cad-video-box video {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  transform: scaleX(-1);
+}
+
+/* Oval guia de rosto — rosa pontilhado */
+.face-guide-oval {
+  position: absolute;
+  width: 44%;
+  height: 62%;
+  border: 2.5px dashed rgba(255, 111, 174, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 0 30px rgba(255, 111, 174, 0.15);
+  animation: oval-pulse 3s ease-in-out infinite;
+}
+
+@keyframes oval-pulse {
+  0%, 100% { border-color: rgba(255, 111, 174, 0.7); }
+  50%       { border-color: rgba(183, 156, 255, 0.85); }
+}
+
+/* Dica de posição */
+.cad-video-hint {
+  position: absolute;
+  bottom: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-main);
+  pointer-events: none;
+  z-index: 3;
+  border: 1px solid rgba(255, 111, 174, 0.2);
+}
+
+.cad-actions-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* Dica de teclado */
+.kbd-hint {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  margin-left: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Caixa de feedback */
+.cad-feedback-box {
+  padding: 11px 16px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #FFF5FA;
+  border: 1.5px solid var(--card-border);
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+  line-height: 1.5;
+}
+
+.cad-feedback-box.error {
+  background: var(--color-red-bg);
+  border-color: var(--color-red-border);
+  color: #C43455;
+}
+
+.cad-feedback-box.success {
+  background: var(--color-green-bg);
+  border-color: var(--color-green-border);
+  color: #1E7A5A;
+}
+
+/* 5 slots de amostras */
+.slots-section {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.slots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slots-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.slots-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.slots-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+/* Slot individual */
+.sample-slot {
+  aspect-ratio: 1;
+  background: #FFF0F8;
+  border: 2px dashed #F8D7E7;
+  border-radius: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.28s var(--transition-bounce);
+}
+
+.sample-slot:hover {
+  border-color: var(--color-rose);
+  transform: scale(1.04);
+}
+
+.slot-number {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.slot-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+  border-radius: 14px;
+}
+
+/* Badge de check verde */
+.slot-check {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-green);
+  color: #FFFFFF;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(78, 216, 165, 0.5);
+}
+
+/* Slot preenchido */
+.sample-slot.filled {
+  border: 2px solid var(--color-green);
+  box-shadow: 0 4px 16px var(--color-green-glow);
+}
+
+.sample-slot.filled .slot-number { display: none; }
+.sample-slot.filled .slot-thumb  { display: block; }
+.sample-slot.filled .slot-check  { display: flex; }
+
+.cad-save-footer {
+  margin-top: 4px;
+}
+
+/* Preview do rostos.json */
+.json-preview-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.json-card-title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 3px;
+}
+
+.json-card-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.json-code-container {
+  background: #FFF5FA;
+  border: 1.5px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  max-height: 520px;
+  overflow: auto;
+  flex: 1;
+}
+
+.json-code-container pre {
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  color: var(--text-main);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ==========================================================================
+   TELA 3: USUÁRIOS CADASTRADOS
+   ========================================================================== */
+
+.usuarios-container {
+  min-height: 400px;
+}
+
+.usuarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Card de usuário */
+.user-card-item {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 20px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(255, 111, 174, 0.07);
+}
+
+.user-card-item:hover {
+  border-color: rgba(255, 111, 174, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(255, 111, 174, 0.15);
+}
+
+.user-info-side {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  overflow: hidden;
+}
+
+/* Avatar com gradiente rosa-lilás */
+.user-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--gradient-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255, 111, 174, 0.3);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.user-name {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-samples-badge {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   TELA 4: REGISTROS DE ACESSO
+   ========================================================================== */
+
+.registros-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th {
+  background: #FFF5F9;
+  padding: 15px 22px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--text-secondary);
+  border-bottom: 1.5px solid var(--card-border);
+}
+
+.data-table td {
+  padding: 14px 22px;
+  font-size: 0.87rem;
+  border-bottom: 1px solid #FFF0F6;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.data-table tr:hover td {
+  background: #FFF8FB;
+}
+
+/* Tags de status */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.status-tag.tag-liberado {
+  background: var(--color-green-bg);
+  color: #1D8C65;
+  border: 1.5px solid var(--color-green-border);
+}
+
+.status-tag.tag-negado {
+  background: var(--color-red-bg);
+  color: #C43455;
+  border: 1.5px solid var(--color-red-border);
+}
+
+/* ==========================================================================
+   ESTADOS: VAZIO e CARREGANDO
+   ========================================================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 70px 24px;
+  text-align: center;
+  gap: 14px;
+  color: var(--text-secondary);
+}
+
+.empty-state svg {
+  color: var(--text-muted);
+  stroke: url(#roseGradient);
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.empty-state p {
+  font-size: 0.88rem;
+  max-width: 400px;
+  margin-bottom: 4px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 70px 24px;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Spinner em gradiente rosa */
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #FFD9ED;
+  border-top-color: var(--color-rose);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .acesso-grid,
+  .cadastro-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 72px;
+    padding: 18px 10px;
+  }
+
+  .logo-text,
+  .nav-item span,
+  .badge-count,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 13px;
+  }
+
+  .main-content {
+    margin-left: 72px;
+    padding: 22px 18px;
+  }
+
+  .view-title {
+    font-size: 1.6rem;
+  }
+
+  .slots-container {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ==========================================================================
+   MICRO-ANIMAÇÕES E RETOQUES FINAIS
+   ========================================================================== */
+
+/* Scrollbar personalizada — rosa suave */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #FFF0F6; border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: #F8D7E7; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-rose); }
+
+/* Seleção de texto */
+::selection {
+  background: rgba(255, 111, 174, 0.22);
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   BOTÃO DE TEMA CLARO/ESCURO
+   ========================================================================== */
+
+.btn-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 15px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: var(--gradient-main-soft);
+  border: 1.5px solid var(--card-border);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.btn-theme-toggle:hover {
+  background: var(--gradient-main);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(255, 111, 174, 0.3);
+}
+
+.btn-theme-label {
+  flex: 1;
+}
+
+/* Transición suave global quando o tema muda */
+body,
+.sidebar,
+.card,
+.main-content,
+.alert-banner,
+.data-table th,
+.data-table td,
+.ai-info-card,
+.embedding-code-box,
+.json-code-container,
+.distance-track,
+.user-card-item {
+  transition: var(--theme-transition);
+}
+
+/* Ajustes finos de cores no tema escuro */
+[data-theme="dark"] body {
+  background: var(--bg-gradient);
+}
+
+[data-theme="dark"] .sidebar {
+  background: #231535;
+  border-right-color: #46305A;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .ai-info-card {
+  background: linear-gradient(135deg, #1B1325 0%, #251833 100%);
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .form-input {
+  background: #1F1330;
+  color: var(--text-main);
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .form-input:focus {
+  border-color: var(--color-rose);
+  box-shadow: 0 0 0 4px rgba(255, 126, 182, 0.15);
+  background: #231535;
+}
+
+[data-theme="dark"] .form-input::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .embedding-code-box {
+  background: #1A1025;
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .json-code-container {
+  background: #1A1025;
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .json-code-container pre {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .distance-track {
+  background: #2E1840;
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .data-table th {
+  background: #1F1330;
+  border-bottom-color: #46305A;
+}
+
+[data-theme="dark"] .data-table td {
+  border-bottom-color: #2A1D38;
+}
+
+[data-theme="dark"] .data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .camera-status-pill {
+  background: rgba(27, 19, 37, 0.9);
+  border-color: rgba(255, 126, 182, 0.25);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .cad-video-hint {
+  background: rgba(27, 19, 37, 0.9);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .sample-slot {
+  background: #1F1330;
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .embedding-canvas-box {
+  background: #1F1330;
+  border-color: #46305A;
+}
+
+[data-theme="dark"] .webcam-footer-info {
+  color: var(--text-secondary);
+}
+
+/* Scrollbar no modo escuro */
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #231535; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #46305A; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: var(--color-rose); }
+
+[data-theme="dark"] ::selection {
+  background: rgba(255, 126, 182, 0.25);
+  color: var(--text-main);
+}

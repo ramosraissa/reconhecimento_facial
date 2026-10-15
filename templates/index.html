@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceGate ✿ - Reconhecimento Facial por Geometria (MediaPipe)</title>
+  <meta name="description" content="Sistema de controle de acesso biométrico por geometria facial usando MediaPipe Face Landmarker — 468 pontos, 1404 dimensões.">
+
+  <!-- Fontes do Google: Fredoka · Nunito · DM Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Estilos principais -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- ==================================================================== -->
+  <!-- SIDEBAR FIXA LATERAL (220px)                                         -->
+  <!-- ==================================================================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-box">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+            <circle cx="9" cy="10" r="1"></circle>
+            <circle cx="15" cy="10" r="1"></circle>
+            <path d="M9.5 15a3.5 3.5 0 0 0 5 0"></path>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">FaceGate</span>
+          <span class="logo-subtitle">GEOMETRIA FACIAL</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="acesso">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Acesso</span>
+      </button>
+
+      <button class="nav-item" data-tab="cadastro">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+        <span>Cadastro</span>
+      </button>
+
+      <button class="nav-item" data-tab="usuarios">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Usuários</span>
+        <span class="badge-count" id="badgeTotalUsuarios">0</span>
+      </button>
+
+      <button class="nav-item" data-tab="registros">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>Registros</span>
+      </button>
+
+      <button class="nav-item" data-tab="calibracao">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"></path>
+        </svg>
+        <span>Calibração</span>
+      </button>
+    </nav>
+
+    <!-- Botão Modo Escuro / Claro -->
+    <button id="btnThemeToggle" class="btn-theme-toggle" title="Alternar tema" aria-label="Alternar tema">
+      <svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <span class="btn-theme-label">Modo Escuro</span>
+    </button>
+
+    <!-- Info da IA no rodapé -->
+    <div class="sidebar-footer">
+      <div class="ai-info-card">
+        <div class="ai-info-row">
+          <span class="info-label">limiar</span>
+          <span class="info-val" id="sbLimiarVal">0.35</span>
+        </div>
+        <div class="ai-info-row">
+          <span class="info-label">dim.</span>
+          <span class="info-val font-mono" id="sbDimVal">1404-d</span>
+        </div>
+        <div class="ai-info-status">
+          <span class="status-dot"></span>
+          <span class="status-text" id="aiStatusText">Carregando MediaPipe...</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================================================================== -->
+  <!-- CONTEÚDO PRINCIPAL                                                    -->
+  <!-- ==================================================================== -->
+  <main class="main-content">
+
+    <!-- Alerta de câmera (discreto) -->
+    <div id="cameraAlert" class="alert-banner hidden">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <div style="flex:1">
+        <span id="cameraAlertMsg">Câmera indisponível. Use o botão "Testar com foto" para continuar.</span>
+      </div>
+    </div>
+
+    <!-- Banner de carregamento do MediaPipe -->
+    <div id="modelLoadingBanner" class="alert-banner" style="background:rgba(183,156,255,0.12);border-color:rgba(183,156,255,0.4);color:var(--text-main);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--color-lilac)">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span id="modelLoadingMsg">⏳ Carregando MediaPipe Face Landmarker... Aguarde.</span>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- TELA 1: ACESSO                                                      -->
+    <!-- ================================================================== -->
+    <section id="tab-acesso" class="tab-view active">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">Controle de Acesso</h1>
+          <p class="view-subtitle">Câmera ao vivo ou foto — geometria facial em 1404 dimensões</p>
+        </div>
+        <div class="header-actions">
+          <label for="inputFotoAcesso" class="btn btn-primary" style="cursor:pointer;" title="Selecionar foto para reconhecimento">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Testar com foto</span>
+          </label>
+          <input type="file" id="inputFotoAcesso" accept="image/*" style="display:none">
+          <button id="btnPausarScanner" class="btn btn-secondary">
+            <svg id="iconPausa" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+            <span id="lblPausa">Pausar Scanner</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Preview da foto de teste -->
+      <div id="fotoAcessoPreviewBox" style="display:none;margin:0 0 14px 0;">
+        <div class="card" style="display:flex;gap:16px;align-items:center;padding:14px 18px;">
+          <img id="fotoAcessoPreviewImg" style="width:110px;height:82px;object-fit:cover;border-radius:10px;border:2px solid var(--color-pink);" alt="Foto teste">
+          <div style="flex:1">
+            <p style="margin:0;font-size:13px;color:var(--text-secondary);font-family:'Nunito',sans-serif;" id="fotoAcessoStatus">Analisando geometria facial...</p>
+          </div>
+          <button id="btnFecharFotoAcesso" class="btn btn-secondary btn-xs">✕ Fechar</button>
+        </div>
+      </div>
+
+      <div class="acesso-grid">
+        <!-- Coluna Esquerda: Webcam e overlay -->
+        <div class="webcam-card">
+          <div class="video-container" id="acessoVideoContainer">
+            <video id="videoAcesso" autoplay playsinline muted></video>
+            <canvas id="overlayAcesso"></canvas>
+            <div class="scanner-laser" id="scannerLaser"></div>
+            <div class="camera-status-pill">
+              <span class="live-dot"></span>
+              <span id="liveStatusText">Câmera ao vivo · 800ms</span>
+            </div>
+          </div>
+          <div class="webcam-footer-info">
+            <span>Alinhe o rosto no centro — MediaPipe extrai 468 pontos geométricos</span>
+          </div>
+        </div>
+
+        <!-- Coluna Direita: 3 cards -->
+        <div class="acesso-cards-col">
+
+          <!-- CARD 1: RESULTADO -->
+          <div class="card card-resultado" id="cardResultado">
+            <div class="card-header-clean">
+              <span class="card-tag">STATUS DE ACESSO</span>
+              <span class="card-subtag" id="resultadoTimestamp">--:--:--</span>
+            </div>
+            <div class="resultado-body">
+              <div class="resultado-icon-wrapper" id="resIconWrapper">
+                <svg id="iconStatus" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+              <div class="resultado-texts">
+                <h2 class="resultado-badge" id="resBadge">AGUARDANDO ROSTO</h2>
+                <p class="resultado-nome" id="resNome">Nenhuma pessoa identificada</p>
+                <p class="resultado-motivo" id="resMotivo">Use a câmera ou envie uma foto</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 2: DISTÂNCIA -->
+          <div class="card card-distancia">
+            <div class="card-header-clean">
+              <span class="card-tag">DISTÂNCIA EUCLIDIANA</span>
+              <span class="metric-highlight font-mono" id="txtDistanciaValor">--</span>
+            </div>
+            <div class="distance-bar-wrapper">
+              <div class="distance-scale-labels">
+                <span>0.00 (Idêntico)</span>
+                <span class="threshold-label-center" id="labelLimiarBar">Limiar: 0.35</span>
+                <span>1.00+ (Diferente)</span>
+              </div>
+              <div class="distance-track-container">
+                <div class="distance-track">
+                  <div class="distance-fill" id="barDistanciaFill"></div>
+                  <div class="threshold-marker" id="thresholdMarker" style="left:35%;">
+                    <div class="marker-flag" id="markerFlagTxt">0.35</div>
+                    <div class="marker-line"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="distance-legend">
+                <div class="legend-item"><span class="dot-legend dot-green"></span><span>Liberado &lt; limiar</span></div>
+                <div class="legend-item"><span class="dot-legend dot-red"></span><span>Negado &ge; limiar</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 3: PREVIEW DO VETOR -->
+          <div class="card card-embedding">
+            <div class="card-header-clean">
+              <div class="flex-align">
+                <span class="card-tag">PREVIEW DO VETOR GEOMÉTRICO</span>
+                <span class="badge-dim font-mono">1404-d</span>
+              </div>
+              <span class="card-subtag font-mono" id="embStatusTxt">Aguardando vetor</span>
+            </div>
+            <div class="embedding-canvas-box">
+              <canvas id="canvasEmbeddingSpectrum" width="512" height="50"></canvas>
+            </div>
+            <div class="embedding-code-box font-mono" id="embRawBox">
+              [aguardando geometria facial para gerar vetor de 1404 números...]
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- TELA 2: CADASTRO                                                    -->
+    <!-- ================================================================== -->
+    <section id="tab-cadastro" class="tab-view">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">Cadastrar Novo Rosto</h1>
+          <p class="view-subtitle">Câmera (5 amostras) ou fotos (1–5 imagens) — geometria extraída por MediaPipe</p>
+        </div>
+        <div class="header-actions">
+          <label for="inputFotosCadastro" class="btn btn-primary" style="cursor:pointer;" title="Cadastrar enviando fotos (sem câmera)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Cadastrar com fotos</span>
+          </label>
+          <input type="file" id="inputFotosCadastro" accept="image/*" multiple style="display:none">
+        </div>
+      </header>
+
+      <div class="cadastro-grid">
+        <!-- Coluna Esquerda: Formulário -->
+        <div class="card cadastro-card-main">
+
+          <div class="form-group">
+            <label for="cadNomeInput" class="form-label">Nome Completo</label>
+            <input type="text" id="cadNomeInput" class="form-input" placeholder="Ex: Lucas Mendes" autocomplete="off">
+          </div>
+
+          <div class="cad-video-box">
+            <video id="videoCadastro" autoplay playsinline muted></video>
+            <div class="face-guide-oval"></div>
+            <div class="cad-video-hint"><span>Posicione o rosto dentro da guia oval</span></div>
+          </div>
+
+          <div class="cad-actions-row">
+            <button id="btnCapturarAmostra" class="btn btn-primary btn-lg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <span>Capturar Amostra <kbd class="kbd-hint">Espaço</kbd></span>
+            </button>
+            <button id="btnLimparAmostras" class="btn btn-secondary">Limpar Amostras</button>
+          </div>
+
+          <div id="cadFeedbackMsg" class="cad-feedback-box">
+            Informe o nome e clique em "Capturar" ou use o botão "Cadastrar com fotos".
+          </div>
+
+          <!-- 5 Slots visuais -->
+          <div class="slots-section">
+            <div class="slots-header">
+              <span class="slots-title">Amostras Coletadas (<span id="slotsCount">0</span>/5)</span>
+              <span class="slots-sub" id="slotsHelpText">Capture ou envie 1–5 amostras para salvar</span>
+            </div>
+            <div class="slots-container">
+              <div class="sample-slot" id="slot-0"><div class="slot-number">1</div><img class="slot-thumb" alt="Amostra 1"><div class="slot-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div></div>
+              <div class="sample-slot" id="slot-1"><div class="slot-number">2</div><img class="slot-thumb" alt="Amostra 2"><div class="slot-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div></div>
+              <div class="sample-slot" id="slot-2"><div class="slot-number">3</div><img class="slot-thumb" alt="Amostra 3"><div class="slot-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div></div>
+              <div class="sample-slot" id="slot-3"><div class="slot-number">4</div><img class="slot-thumb" alt="Amostra 4"><div class="slot-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div></div>
+              <div class="sample-slot" id="slot-4"><div class="slot-number">5</div><img class="slot-thumb" alt="Amostra 5"><div class="slot-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></div></div>
+            </div>
+          </div>
+
+          <div class="cad-save-footer">
+            <button id="btnSalvarCadastroFinal" class="btn btn-success btn-full" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              <span>Salvar Cadastro</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Coluna Direita: Preview rostos.json -->
+        <div class="card json-preview-card">
+          <div class="card-header-clean">
+            <div>
+              <span class="card-tag">PERSISTÊNCIA LOCAL</span>
+              <h3 class="json-card-title">Preview do rostos.json</h3>
+            </div>
+            <button id="btnRecarregarJson" class="btn btn-xs btn-secondary" title="Recarregar JSON">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              <span>Atualizar</span>
+            </button>
+          </div>
+          <p class="json-card-desc">Mapa de pessoas e vetores geométricos de 1404 dimensões:</p>
+          <div class="json-code-container">
+            <pre id="jsonPreviewContent" class="font-mono">Carregando rostos.json...</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- TELA 3: USUÁRIOS                                                    -->
+    <!-- ================================================================== -->
+    <section id="tab-usuarios" class="tab-view">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">Usuários Cadastrados</h1>
+          <p class="view-subtitle">Gerenciamento de identidades biométricas salvas no sistema</p>
+        </div>
+        <div class="header-actions">
+          <button id="btnNovoCadastroRapido" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Novo Cadastro</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="card usuarios-container">
+        <div id="usuariosLoading" class="loading-state">
+          <div class="spinner"></div>
+          <span>Carregando usuários...</span>
+        </div>
+        <div id="usuariosVazio" class="empty-state hidden">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+          <h3>Nenhum usuário cadastrado</h3>
+          <p>Cadastre a primeira pessoa para iniciar o controle de acesso.</p>
+          <button class="btn btn-primary" onclick="window.FaceGateApp.navegarPara('cadastro')">Ir para Cadastro</button>
+        </div>
+        <div id="usuariosGrid" class="usuarios-grid hidden"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- TELA 4: REGISTROS                                                   -->
+    <!-- ================================================================== -->
+    <section id="tab-registros" class="tab-view">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">Histórico de Acessos</h1>
+          <p class="view-subtitle">Auditoria de todas as tentativas com data/hora, distância e status</p>
+        </div>
+        <div class="header-actions">
+          <button id="btnAtualizarRegistros" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>Atualizar</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="card registros-card">
+        <div class="table-responsive">
+          <table class="data-table" id="tabelaRegistros">
+            <thead>
+              <tr>
+                <th>Data e Hora</th>
+                <th>Identificação / Nome</th>
+                <th>Distância</th>
+                <th>Limiar</th>
+                <th>Decisão</th>
+              </tr>
+            </thead>
+            <tbody id="registrosTableBody"></tbody>
+          </table>
+        </div>
+        <div id="registrosVazio" class="empty-state hidden">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <h3>Nenhum registro de acesso</h3>
+          <p>As tentativas de reconhecimento serão registradas aqui.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- TELA 5: CALIBRAÇÃO                                                  -->
+    <!-- ================================================================== -->
+    <section id="tab-calibracao" class="tab-view">
+      <header class="view-header">
+        <div>
+          <h1 class="view-title">Calibração do Limiar</h1>
+          <p class="view-subtitle">Analise as distâncias intra-pessoa e inter-pessoa para escolher o limiar ideal</p>
+        </div>
+      </header>
+
+      <div class="cadastro-grid">
+        <!-- Card de controle -->
+        <div class="card cadastro-card-main">
+          <div class="form-group">
+            <label for="calibUsuarioSelect" class="form-label">Usuário para analisar</label>
+            <select id="calibUsuarioSelect" class="form-input">
+              <option value="">-- Selecione um usuário --</option>
+            </select>
+          </div>
+
+          <button id="btnCalcularCalibracao" class="btn btn-primary btn-lg" style="width:100%;margin-top:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"></path>
+            </svg>
+            <span>Calcular Calibração</span>
+          </button>
+
+          <div id="calibFeedback" class="cad-feedback-box" style="margin-top:12px;"></div>
+
+          <!-- Resultado de calibração -->
+          <div id="calibResultado" style="display:none;margin-top:16px;">
+            <div class="card" style="padding:16px;margin-bottom:12px;background:rgba(78,216,165,0.08);border-color:rgba(78,216,165,0.3);">
+              <p class="card-tag" style="margin-bottom:8px;">INTRA-PESSOA (mesma pessoa, amostras diferentes)</p>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <span class="font-mono" style="font-size:13px;">Mín: <strong id="calibIntraMin">--</strong></span>
+                <span class="font-mono" style="font-size:13px;">Máx: <strong id="calibIntraMax">--</strong></span>
+                <span class="font-mono" style="font-size:13px;">Média: <strong id="calibIntraMedia">--</strong></span>
+              </div>
+              <div id="calibIntraDistancias" class="font-mono" style="font-size:12px;margin-top:8px;color:var(--text-secondary);word-break:break-all;"></div>
+            </div>
+
+            <div class="card" style="padding:16px;margin-bottom:12px;background:rgba(255,107,138,0.08);border-color:rgba(255,107,138,0.3);">
+              <p class="card-tag" style="margin-bottom:8px;">INTER-PESSOA (contra outros usuários)</p>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <span class="font-mono" style="font-size:13px;">Mín: <strong id="calibInterMin">--</strong></span>
+                <span class="font-mono" style="font-size:13px;">Máx: <strong id="calibInterMax">--</strong></span>
+                <span class="font-mono" style="font-size:13px;">Média: <strong id="calibInterMedia">--</strong></span>
+              </div>
+              <div id="calibInterDetalhes" class="font-mono" style="font-size:12px;margin-top:8px;color:var(--text-secondary);word-break:break-all;"></div>
+            </div>
+
+            <div class="card" style="padding:16px;background:rgba(183,156,255,0.12);border-color:rgba(183,156,255,0.4);">
+              <p class="card-tag" style="margin-bottom:8px;">SUGESTÃO DE LIMIAR</p>
+              <p class="font-mono" style="font-size:22px;font-weight:700;color:var(--color-lilac);margin:0;" id="calibSugestao">--</p>
+              <p style="font-size:13px;color:var(--text-secondary);margin:6px 0 0;" id="calibDica">
+                O limiar ideal fica entre o <strong>máx intra-pessoa</strong> e o <strong>mín inter-pessoa</strong>. Se o servidor usa LIMIAR diferente, edite a constante no topo do server.js.
+              </p>
+              <p style="font-size:12px;color:var(--text-secondary);margin:4px 0 0;">Limiar atual do servidor: <span class="font-mono" id="calibLimiarAtual">--</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explicação visual -->
+        <div class="card json-preview-card">
+          <div class="card-header-clean">
+            <div>
+              <span class="card-tag">COMO CALIBRAR</span>
+              <h3 class="json-card-title">Guia de Calibração</h3>
+            </div>
+          </div>
+          <div style="font-size:14px;line-height:1.7;color:var(--text-secondary);padding:4px 0;">
+            <p><strong style="color:var(--color-green);">Distância intra-pessoa</strong> = distância entre amostras da <em>mesma</em> pessoa. Deve ser <strong>pequena</strong>.</p>
+            <p><strong style="color:var(--color-coral);">Distância inter-pessoa</strong> = distância entre amostras de <em>pessoas diferentes</em>. Deve ser <strong>grande</strong>.</p>
+            <hr style="border-color:var(--border-color);margin:12px 0;">
+            <p>✅ <strong>Limiar ideal</strong> = valor entre o máximo intra e o mínimo inter.</p>
+            <p>⚠️ Se o máximo intra ≥ mínimo inter, as amostras se sobrepõem — recadastre com mais fotos ou mais variações de posição.</p>
+            <hr style="border-color:var(--border-color);margin:12px 0;">
+            <p>📏 <strong>Dicas de captura:</strong></p>
+            <ul style="padding-left:18px;margin:0;">
+              <li>Capture amostras com <em>iluminações</em> diferentes</li>
+              <li>Varie levemente o <em>ângulo</em> do rosto (5–15°)</li>
+              <li>Evite sombras fortes sobre o rosto</li>
+              <li>Mantenha o rosto dentro da guia oval</li>
+            </ul>
+            <hr style="border-color:var(--border-color);margin:12px 0;">
+            <p>🔧 Para alterar o limiar, edite <span class="font-mono" style="background:rgba(183,156,255,0.15);padding:2px 6px;border-radius:4px;">const LIMIAR = 0.35;</span> no arquivo <span class="font-mono">server.js</span> e reinicie o servidor.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MediaPipe Tasks Vision — carregado do servidor local -->
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>
