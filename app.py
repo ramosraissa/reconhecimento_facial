@@ -9,10 +9,16 @@ Dados salvos em faces.json (criado automaticamente).
 
 import json
 import math
+import os
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 
 import mimetypes
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+# Carrega as variáveis do .env (busca na pasta pai do projeto)
+load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 # Garantir mimetypes corretos para WebAssembly e ES Modules
 mimetypes.add_type("application/wasm", ".wasm")
@@ -25,6 +31,19 @@ THRESHOLD = 0.06          # Distância euclidiana média máxima para liberar ac
 FACES_FILE = Path("faces.json")
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
+
+# ─────────────────────────────────────────────
+# SUPABASE — inicialização
+# ─────────────────────────────────────────────
+_SUPABASE_URL: str = os.getenv("supabase_url", "")
+_SUPABASE_KEY: str = os.getenv("supabase_secret_key", "")
+
+if _SUPABASE_URL and _SUPABASE_KEY:
+    supabase: Client = create_client(_SUPABASE_URL, _SUPABASE_KEY)
+    print("[Supabase] ✅ Cliente conectado com sucesso.")
+else:
+    supabase = None
+    print("[Supabase] ⚠️  Credenciais não encontradas no .env — salvamento remoto desativado.")
 
 
 @app.after_request
@@ -137,6 +156,29 @@ def api_register():
     db = load_faces()
     db[name] = {"samples": samples}
     save_faces(db)
+
+    # ── Persistência no Supabase ──────────────────────────────────────
+    if supabase:
+        # Usa a média dos embeddings enviados como vetor representativo
+        embedding = samples[0] if len(samples) == 1 else [
+            sum(s[i] for s in samples) / len(samples)
+            for i in range(len(samples[0]))
+        ]
+        try:
+            response = (
+                supabase
+                .table("usuarios_cadastrados")
+                .insert({
+                    "nome": name,
+                    "embedding": embedding,
+                    "soft_delete": False,
+                })
+                .execute()
+            )
+            print(f"[Supabase] ✅ Usuário '{name}' salvo com sucesso. ID: {response.data[0].get('id') if response.data else 'N/A'}")
+        except Exception as e:
+            print(f"[Supabase] ❌ Erro ao salvar usuário '{name}': {e}")
+    # ─────────────────────────────────────────────────────────────────
 
     return jsonify({"ok": True, "msg": f"{name} cadastrado com {len(samples)} amostras."})
 
