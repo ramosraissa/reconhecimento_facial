@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceGate — Reconhecimento Facial</title>
+  <meta name="description" content="Sistema de controle de acesso biométrico por geometria facial usando MediaPipe Face Landmarker com 478 landmarks 3D.">
+
+  <!-- Script inline para aplicar tema imediatamente sem FOUC -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('facegate-theme');
+        if (saved === 'dark' || saved === 'light') {
+          document.documentElement.setAttribute('data-theme', saved);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Fontes do Google: Fredoka · Nunito · Quicksand · DM Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── VARIÁVEIS CSS — TEMA ROSA & FEMININO (CLARO) ─── */
+    :root {
+      /* Fundo & Superfícies */
+      --bg-base:        #FFF5F9;
+      --bg-gradient:    linear-gradient(140deg, #FFF5F9 0%, #F6F0FF 100%);
+      --bg-surface:     #FFFFFF;
+      --bg-elevated:    #FFF0F6;
+      --bg-hover:       #FCE7F3;
+      --border:         #F8D7E7;
+      --border-strong:  #F472B6;
+
+      /* Textos */
+      --text-primary:   #4A2B45;
+      --text-secondary: #8B557B;
+      --text-muted:     #B88BA8;
+
+      /* Cores Principais — Rosa & Lilás */
+      --accent:         #EC4899;
+      --accent-hover:   #DB2777;
+      --accent-glow:    rgba(236, 72, 153, 0.28);
+      --accent-soft:    rgba(236, 72, 153, 0.12);
+      --accent-pastel:  #FBCFE8;
+      --color-rose:     #FF6FAE;
+      --color-lilac:    #B79CFF;
+      --lilac-soft:     rgba(183, 156, 255, 0.15);
+
+      /* Status Suaves */
+      --green:          #4ED8A5;
+      --green-glow:     rgba(78, 216, 165, 0.24);
+      --green-soft:     #E8FBF3;
+      --green-border:   rgba(78, 216, 165, 0.35);
+
+      --red:            #FF6B8A;
+      --red-glow:       rgba(255, 107, 138, 0.24);
+      --red-soft:       #FFECF0;
+      --red-border:     rgba(255, 107, 138, 0.35);
+
+      --yellow:         #FFB88C;
+      --yellow-soft:    rgba(255, 184, 140, 0.18);
+      --yellow-border:  rgba(255, 184, 140, 0.45);
+
+      /* Formatos arredondados e sombras rosadas suaves */
+      --radius-sm:      14px;
+      --radius:         20px;
+      --radius-lg:      26px;
+      --radius-xl:      34px;
+
+      --shadow:         0 8px 30px rgba(255, 111, 174, 0.12);
+      --shadow-hover:   0 14px 40px rgba(255, 111, 174, 0.22);
+      --transition:     0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── TEMA ESCURO — [data-theme="dark"] ─── */
+    [data-theme="dark"] {
+      /* Fundo escuro arroxeado */
+      --bg-base:        #1A1020;
+      --bg-gradient:    linear-gradient(140deg, #1A1020 0%, #25142E 100%);
+      --bg-surface:     #2A1A33;
+      --bg-elevated:    #352042;
+      --bg-hover:       #442955;
+      --border:         #4D2D5E;
+      --border-strong:  #EC4899;
+
+      /* Textos claros e legíveis */
+      --text-primary:   #FDF2F8;
+      --text-secondary: #E9D5FF;
+      --text-muted:     #D8B4FE;
+
+      /* Cores Principais — Rosa vibrante */
+      --accent:         #EC4899;
+      --accent-hover:   #F472B6;
+      --accent-glow:    rgba(236, 72, 153, 0.4);
+      --accent-soft:    rgba(236, 72, 153, 0.22);
+      --accent-pastel:  rgba(244, 114, 182, 0.35);
+      --color-rose:     #FF7EB6;
+      --color-lilac:    #C084FC;
+      --lilac-soft:     rgba(192, 132, 252, 0.2);
+
+      /* Status no modo escuro */
+      --green:          #34D399;
+      --green-glow:     rgba(52, 211, 153, 0.35);
+      --green-soft:     rgba(16, 185, 129, 0.18);
+      --green-border:   rgba(52, 211, 153, 0.5);
+
+      --red:            #FB7185;
+      --red-glow:       rgba(251, 113, 133, 0.35);
+      --red-soft:       rgba(244, 63, 94, 0.18);
+      --red-border:     rgba(251, 113, 133, 0.5);
+
+      --yellow:         #FBBF24;
+      --yellow-soft:    rgba(251, 191, 36, 0.2);
+      --yellow-border:  rgba(251, 191, 36, 0.5);
+
+      --shadow:         0 8px 30px rgba(0, 0, 0, 0.5);
+      --shadow-hover:   0 14px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    [data-theme="dark"] .sidebar {
+      background: rgba(38, 22, 47, 0.94);
+      border-right-color: var(--border);
+    }
+    [data-theme="dark"] .form-input:focus {
+      background: #352042;
+      color: #FFFFFF;
+    }
+    [data-theme="dark"] .video-overlay-label {
+      background: rgba(36, 20, 44, 0.9);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .result-text h2.granted,
+    [data-theme="dark"] .feedback-box.ok {
+      color: #34D399;
+    }
+    [data-theme="dark"] .result-text h2.denied,
+    [data-theme="dark"] .feedback-box.err {
+      color: #FB7185;
+    }
+    [data-theme="dark"] .dist-marker::after {
+      color: #FBBF24;
+    }
+
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', 'Quicksand', system-ui, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .logo-name, .page-title {
+      font-family: 'Fredoka', 'Quicksand', sans-serif;
+      letter-spacing: -0.3px;
+    }
+
+    /* ─── LAYOUT ─── */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: 100vh;
+      height: 100vh;
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-right: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 18px;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 10px 22px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #FFF0F6 0%, #FCE7F3 100%);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(236, 72, 153, 0.15);
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      display: flex; flex-direction: column;
+    }
+    .logo-name {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .logo-tag  {
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      border: 1.5px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14.5px;
+      font-weight: 600;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+      transition: all var(--transition);
+      width: 100%;
+      text-align: left;
+    }
+    .nav-btn:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+      transform: translateX(2px);
+    }
+    .nav-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-pastel);
+      color: var(--accent);
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(236, 72, 153, 0.12);
+    }
+    .nav-btn svg { flex-shrink: 0; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1.5px dashed var(--border);
+    }
+    .sidebar-info {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .info-row { display: flex; justify-content: space-between; align-items: center; }
+    .info-val { color: var(--text-primary); font-family: 'DM Mono', monospace; font-weight: 600; }
+
+    /* ─── MAIN ─── */
+    .main {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── TABS ─── */
+    .tab-view { display: none; flex-direction: column; flex: 1; padding: 32px 36px; gap: 24px; }
+    .tab-view.active { display: flex; }
+
+    /* ─── PAGE HEADER ─── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .page-sub {
+      font-size: 14.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: box-shadow var(--transition);
+    }
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+    }
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 999px;
+      font-size: 14.5px;
+      font-weight: 700;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #EC4899 0%, #FF6FAE 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 18px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #DB2777 0%, #EC4899 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--accent-glow);
+    }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary {
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-pastel);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .btn-success {
+      background: var(--green);
+      color: #064E3B;
+      box-shadow: 0 4px 16px var(--green-glow);
+    }
+    .btn-success:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-success:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-lg { padding: 14px 28px; font-size: 15.5px; }
+    .btn-full { width: 100%; }
+
+    /* ─── FORM ─── */
+    .form-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      padding: 12px 16px;
+      transition: all var(--transition);
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    /* ─── STATUS BANNER ─── */
+    .status-banner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow);
+      transition: all var(--transition);
+    }
+    .status-banner.loading {
+      border-color: var(--accent-pastel);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .status-banner.error {
+      border-color: var(--red-border);
+      background: var(--red-soft);
+      color: var(--red);
+    }
+    .status-banner.success {
+      border-color: var(--green-border);
+      background: var(--green-soft);
+      color: #065F46;
+    }
+    .status-banner.hidden { display: none; }
+
+    /* ─── VIDEO ─── */
+    .video-wrapper {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: #1A121E;
+      aspect-ratio: 4/3;
+      border: 2px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .video-wrapper video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: block;
+    }
+    .video-overlay-label {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    /* ─── TAB VERIFICAR ─── */
+    .verify-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ─── RESULTADO ─── */
+    .result-card {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .result-display {
+      display: flex; align-items: center; gap: 16px;
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border);
+      background: var(--bg-surface);
+      box-shadow: var(--shadow);
+      transition: all 0.4s ease;
+      min-height: 96px;
+    }
+    .result-display.access-granted {
+      border-color: var(--green);
+      background: var(--green-soft);
+      box-shadow: 0 10px 35px var(--green-glow);
+    }
+    .result-display.access-denied {
+      border-color: var(--red);
+      background: var(--red-soft);
+      box-shadow: 0 10px 35px var(--red-glow);
+    }
+    .result-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      background: var(--bg-elevated);
+      font-size: 26px;
+      transition: all 0.4s ease;
+      border: 1.5px solid var(--border);
+    }
+    .result-icon.granted {
+      background: var(--green-glow);
+      border-color: var(--green);
+    }
+    .result-icon.denied {
+      background: var(--red-glow);
+      border-color: var(--red);
+    }
+    .result-text h2 {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .result-text p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .result-text h2.granted { color: #047857; }
+    .result-text h2.denied  { color: #E11D48; }
+
+    .metric-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+    }
+    .metric-key { color: var(--text-secondary); font-weight: 600; }
+    .metric-val { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+    /* ─── PROGRESS BAR ─── */
+    .dist-track {
+      width: 100%; height: 10px;
+      background: var(--bg-elevated);
+      border-radius: 999px;
+      position: relative;
+      overflow: visible;
+      margin: 6px 0;
+      border: 1px solid var(--border);
+    }
+    .dist-fill {
+      height: 100%; border-radius: 999px;
+      transition: width 0.4s ease, background-color 0.4s ease;
+      background: var(--green);
+    }
+    .dist-fill.over { background: var(--red); }
+    .dist-marker {
+      position: absolute; top: -5px;
+      width: 3px; height: 20px;
+      background: var(--yellow);
+      border-radius: 2px;
+    }
+    .dist-marker::after {
+      content: attr(data-label);
+      position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: #B45309; font-weight: 700;
+      font-family: 'DM Mono', monospace; white-space: nowrap;
+    }
+
+    /* ─── SAMPLES DOTS ─── */
+    .samples-dots {
+      display: flex; gap: 10px; align-items: center;
+      margin-top: 10px;
+    }
+    .dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg-surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .dot.filled {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      transform: scale(1.05);
+    }
+    .dot.current {
+      border-color: var(--color-lilac);
+      background: var(--lilac-soft);
+      color: #6D28D9;
+      animation: pulse-dot 1.2s ease infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); box-shadow: 0 0 14px rgba(183, 156, 255, 0.4); }
+    }
+
+    /* ─── USERS LIST ─── */
+    .users-list { display: flex; flex-direction: column; gap: 12px; }
+    .user-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 16px rgba(255, 111, 174, 0.08);
+      transition: all var(--transition);
+    }
+    .user-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+    .user-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFF0F6 0%, #FCE7F3 100%);
+      border: 1.5px solid var(--accent-pastel);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: var(--accent);
+      flex-shrink: 0;
+    }
+    .user-name { font-weight: 700; font-size: 16px; color: var(--text-primary); }
+    .user-meta { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+
+    .btn-delete-user {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border: 1.5px solid var(--red-border);
+      border-radius: 999px;
+      background: var(--red-soft);
+      color: var(--red);
+      font-size: 12.5px;
+      font-weight: 700;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-delete-user:hover {
+      background: var(--red);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--red-glow);
+    }
+
+    .btn-delete-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border: 1.5px solid var(--red-border);
+      border-radius: 999px;
+      background: var(--red-soft);
+      color: var(--red);
+      font-size: 13.5px;
+      font-weight: 700;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-delete-all:hover {
+      background: var(--red);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--red-glow);
+    }
+
+    /* ─── BOTÃO TEMA CLARO / ESCURO ─── */
+    .btn-theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13.5px;
+      font-weight: 700;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+      transition: all var(--transition);
+      width: 100%;
+    }
+    .btn-theme-toggle:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .empty-state svg { opacity: 0.5; margin-bottom: 12px; color: var(--accent); }
+    .empty-state h3 { font-size: 17px; color: var(--text-primary); margin-bottom: 6px; }
+    .empty-state p  { font-size: 13.5px; }
+
+    /* ─── SPINNER ─── */
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2.5px solid rgba(236, 72, 153, 0.25);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── SCAN ANIMATION ─── */
+    .scan-line {
+      position: absolute; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      animation: scan 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes scan {
+      0%   { top: 10%; opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { top: 90%; opacity: 0; }
+    }
+
+    /* ─── FEEDBACK ─── */
+    .feedback-box {
+      padding: 13px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 500;
+      border: 1.5px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      min-height: 46px;
+      transition: all var(--transition);
+    }
+    .feedback-box.ok    { border-color: var(--green-border); color: #047857; background: var(--green-soft); }
+    .feedback-box.err   { border-color: var(--red-border);   color: #E11D48; background: var(--red-soft); }
+    .feedback-box.warn  { border-color: var(--yellow-border);color: #B45309; background: var(--yellow-soft); }
+
+    /* ─── UTILITIES ─── */
+    .flex { display: flex; }
+    .flex-col { display: flex; flex-direction: column; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .hidden { display: none !important; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .app-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .sidebar { flex-direction: row; flex-wrap: wrap; padding: 14px; border-right: none; border-bottom: 1.5px solid var(--border); }
+      .sidebar-logo { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+      .sidebar-footer { display: none; }
+      .verify-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/>
+          <path d="M9.5 15a3.5 3.5 0 0 0 5 0"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-name">FaceGate ✿</span>
+        <span class="logo-tag">🌸 Geometria Facial · 478 pts</span>
+      </div>
+    </div>
+
+    <button class="nav-btn active" id="nav-register" data-tab="register">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="8.5" cy="7" r="4"/>
+        <line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+      </svg>
+      Cadastrar rosto 💖
+    </button>
+
+    <button class="nav-btn" id="nav-verify" data-tab="verify">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Verificar acesso ✨
+    </button>
+
+    <button class="nav-btn" id="nav-users" data-tab="users">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Usuários 🌸
+      <span id="users-badge" style="margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;">0</span>
+    </button>
+
+    <!-- Botão Alternar Tema Claro / Escuro -->
+    <button id="btn-theme-toggle" class="btn-theme-toggle" title="Alternar tema claro / escuro" aria-label="Alternar tema" style="margin-top:auto;">
+      <span id="theme-toggle-icon">🌙</span>
+      <span id="theme-toggle-text">Modo Escuro</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-info">
+        <div class="info-row">
+          <span>Threshold</span>
+          <span class="info-val" id="sidebar-threshold">0.06</span>
+        </div>
+        <div class="info-row">
+          <span>Modelo</span>
+          <span class="info-val">478 pts · 3D</span>
+        </div>
+        <div class="info-row" id="model-status-row">
+          <span>Status</span>
+          <span class="info-val" id="sidebar-model-status">Carregando...</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Banner de status do modelo -->
+    <div id="model-banner" class="status-banner loading" style="margin:20px 36px 0;">
+      <div class="spinner"></div>
+      <span id="model-banner-msg">Carregando MediaPipe Face Landmarker... aguarde.</span>
+    </div>
+
+    <!-- ═══ TAB: CADASTRAR ROSTO ═══ -->
+    <section class="tab-view active" id="tab-register">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Cadastrar Rosto 💖</h1>
+          <p class="page-sub">Capture 5 amostras do seu rosto para cadastrar com alta precisão</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+        <!-- Vídeo -->
+        <div class="card" style="padding:20px;">
+          <div class="card-label">📹 Câmera ao vivo ✿</div>
+          <div class="video-wrapper">
+            <video id="video-register" autoplay playsinline muted></video>
+            <div class="scan-line" id="scan-line-reg"></div>
+            <div class="video-overlay-label" id="reg-overlay-label">Posicione o rosto no centro</div>
+          </div>
+        </div>
+
+        <!-- Formulário -->
+        <div class="card flex-col gap-3">
+          <div class="card-label">Informações</div>
+
+          <div>
+            <label for="input-name" class="form-label">Nome completo</label>
+            <input type="text" id="input-name" class="form-input" placeholder="Ex: Maria Oliveira" autocomplete="off">
+          </div>
+
+          <div>
+            <div class="card-label" style="margin-bottom:8px;">Amostras capturadas</div>
+            <div class="samples-dots" id="samples-dots">
+              <div class="dot current" id="dot-0">1</div>
+              <div class="dot" id="dot-1">2</div>
+              <div class="dot" id="dot-2">3</div>
+              <div class="dot" id="dot-3">4</div>
+              <div class="dot" id="dot-4">5</div>
+              <span id="samples-count-label" style="font-size:13px;color:var(--text-muted);margin-left:4px;">0 / 5</span>
+            </div>
+          </div>
+
+          <div id="register-feedback" class="feedback-box">
+            Informe o nome e clique em "Iniciar Cadastro" para capturar as 5 amostras.
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button class="btn btn-primary btn-lg" id="btn-start-register" style="flex:1;" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              Iniciar Cadastro
+            </button>
+            <button class="btn btn-secondary" id="btn-clear-register">Limpar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TAB: VERIFICAR ACESSO ═══ -->
+    <section class="tab-view" id="tab-verify">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Verificar Acesso ✨</h1>
+          <p class="page-sub">Aponte o rosto para a câmera e clique em "Verificar"</p>
+        </div>
+      </div>
+
+      <div class="verify-grid">
+        <!-- Vídeo -->
+        <div class="card" style="padding:20px;">
+          <div class="card-label">📹 Câmera ao vivo ✿</div>
+          <div class="video-wrapper">
+            <video id="video-verify" autoplay playsinline muted></video>
+            <div class="scan-line hidden" id="scan-line-ver"></div>
+            <div class="video-overlay-label" id="ver-overlay-label">Câmera pronta</div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary btn-full btn-lg" id="btn-verify" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              Verificar Acesso ✨
+            </button>
+          </div>
+        </div>
+
+        <!-- Resultado -->
+        <div class="flex-col gap-3">
+          <div class="result-display" id="result-display">
+            <div class="result-icon" id="result-icon">🔍</div>
+            <div class="result-text">
+              <h2 id="result-title">Aguardando</h2>
+              <p id="result-subtitle">Clique em "Verificar Acesso"</p>
+            </div>
+          </div>
+
+          <div id="metrics-section" class="flex-col gap-2" style="display:none;">
+            <div class="metric-row">
+              <span class="metric-key">Distância calculada</span>
+              <span class="metric-val" id="metric-distance">—</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-key">Limite (threshold)</span>
+              <span class="metric-val" id="metric-threshold">—</span>
+            </div>
+
+            <!-- Barra visual -->
+            <div class="card" style="padding:16px;">
+              <div class="card-label">📊 Barra de proximidade geométrica</div>
+              <div class="dist-track">
+                <div class="dist-fill" id="dist-fill" style="width:0%"></div>
+                <div class="dist-marker" id="dist-marker" data-label="0.06" style="left:6%"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);margin-top:8px;font-family:'DM Mono',monospace;font-weight:500;">
+                <span>0.00 (idêntico) 💖</span>
+                <span>1.00+ (diferente)</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="verify-feedback" class="feedback-box hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TAB: USUÁRIOS ═══ -->
+    <section class="tab-view" id="tab-users">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Usuários Cadastrados 🌸</h1>
+          <p class="page-sub">Gerencie as identidades biométricas salvas no sistema</p>
+        </div>
+        <button class="btn btn-secondary" id="btn-refresh-users" style="flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Atualizar 🌸
+        </button>
+      </div>
+
+      <div class="card">
+        <div id="users-loading" class="empty-state" style="padding:32px;">
+          <div class="spinner" style="margin:0 auto 12px;"></div>
+          <p>Carregando usuários...</p>
+        </div>
+        <div id="users-empty" class="empty-state hidden">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          </svg>
+          <h3>Nenhum usuário cadastrado 🌸</h3>
+          <p>Vá para "Cadastrar rosto" para adicionar a primeira pessoa.</p>
+        </div>
+        <div id="users-list" class="users-list hidden"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "@mediapipe/tasks-vision": "/static/mediapipe/vision_bundle.mjs"
+  }
+}
+</script>
+
+<script type="module">
+// ════════════════════════════════════════════════════════════════════════
+// FaceGate Frontend — ES Module
+// Usa @mediapipe/tasks-vision v0.10.14 localmente em /static/mediapipe/
+// ════════════════════════════════════════════════════════════════════════
+
+const LOCAL_MEDIAPIPE = '/static/mediapipe/';
+
+
+// ─── Estado global ───
+const state = {
+  landmarker: null,
+  modelReady: false,
+  cameraStream: null,
+  registerSamples: [],   // vetores normalizados coletados no cadastro
+  isCapturing: false,
+};
+
+// ─── Elementos DOM ───
+const $ = id => document.getElementById(id);
+
+const UI = {
+  modelBanner:     $('model-banner'),
+  modelBannerMsg:  $('model-banner-msg'),
+  sidebarThreshold:$('sidebar-threshold'),
+  sidebarModelStatus: $('sidebar-model-status'),
+  usersBadge:      $('users-badge'),
+
+  // Cadastro
+  videoRegister:   $('video-register'),
+  inputName:       $('input-name'),
+  btnStartRegister:$('btn-start-register'),
+  btnClearRegister:$('btn-clear-register'),
+  registerFeedback:$('register-feedback'),
+  samplesDots:     Array.from({length:5}, (_,i) => $('dot-'+i)),
+  samplesCountLabel:$('samples-count-label'),
+  regOverlayLabel: $('reg-overlay-label'),
+  scanLineReg:     $('scan-line-reg'),
+
+  // Verificar
+  videoVerify:     $('video-verify'),
+  btnVerify:       $('btn-verify'),
+  resultDisplay:   $('result-display'),
+  resultIcon:      $('result-icon'),
+  resultTitle:     $('result-title'),
+  resultSubtitle:  $('result-subtitle'),
+  metricsSection:  $('metrics-section'),
+  metricDistance:  $('metric-distance'),
+  metricThreshold: $('metric-threshold'),
+  distFill:        $('dist-fill'),
+  distMarker:      $('dist-marker'),
+  verifyFeedback:  $('verify-feedback'),
+  verOverlayLabel: $('ver-overlay-label'),
+  scanLineVer:     $('scan-line-ver'),
+
+  // Usuários
+  usersLoading:    $('users-loading'),
+  usersEmpty:      $('users-empty'),
+  usersList:       $('users-list'),
+  btnRefreshUsers: $('btn-refresh-users'),
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// 1. CARREGAR MEDIAPIPE
+// ════════════════════════════════════════════════════════════════════════
+
+async function loadMediaPipe() {
+  setModelBanner('loading', 'Carregando MediaPipe Tasks Vision local...');
+  try {
+    const { FaceLandmarker, FilesetResolver } = await import('/static/mediapipe/vision_bundle.mjs');
+
+    setModelBanner('loading', 'Carregando WebAssembly e modelo...');
+    const filesetResolver = await FilesetResolver.forVisionTasks('/static/mediapipe/wasm');
+
+    state.landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+      baseOptions: {
+        modelAssetPath: '/static/mediapipe/face_landmarker.task',
+        delegate: 'CPU',
+      },
+      runningMode: 'VIDEO',
+      numFaces: 1,
+      outputFaceBlendshapes: false,
+      outputFacialTransformationMatrixes: false,
+    });
+
+    state.modelReady = true;
+    setModelBanner('success', '✓ Modelo carregado — detecção ativa');
+    UI.sidebarModelStatus.textContent = 'Pronto';
+
+    setTimeout(() => UI.modelBanner.classList.add('hidden'), 3000);
+
+    // Habilitar botões
+    UI.btnStartRegister.disabled = false;
+    UI.btnVerify.disabled = false;
+
+    // Iniciar câmeras
+    await startCamera(UI.videoRegister);
+    await startCamera(UI.videoVerify);
+
+  } catch (e) {
+    console.error(e);
+    setModelBanner('error', '✗ Falha ao carregar o modelo: ' + String(e?.message || e));
+    UI.sidebarModelStatus.textContent = 'Erro';
+  }
+}
+
+function setModelBanner(type, msg) {
+  UI.modelBanner.className = 'status-banner ' + type;
+  UI.modelBannerMsg.textContent = msg;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 2. CÂMERA
+// ════════════════════════════════════════════════════════════════════════
+
+async function startCamera(videoEl) {
+  if (!state.cameraStream) {
+    try {
+      state.cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+        audio: false,
+      });
+    } catch (err) {
+      const msg = err.name === 'NotAllowedError'
+        ? 'Câmera negada pelo usuário. Permita o acesso nas configurações do navegador.'
+        : 'Câmera não encontrada: ' + err.message;
+      setModelBanner('error', '✗ ' + msg);
+      return;
+    }
+  }
+  videoEl.srcObject = state.cameraStream;
+  await videoEl.play().catch(() => {});
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 3. EXTRAÇÃO DE LANDMARKS
+// ════════════════════════════════════════════════════════════════════════
+
+/**
+ * Detecta landmarks no frame atual de um elemento <video>.
+ * Retorna o vetor normalizado flat [x0,y0,z0, x1,y1,z1, ...] (478*3 floats)
+ * ou null se nenhum rosto for detectado.
+ */
+function detectAndExtract(videoEl) {
+  if (!state.landmarker || !state.modelReady) return null;
+  if (videoEl.readyState < 2) return null;
+
+  const W = videoEl.videoWidth  || 640;
+  const H = videoEl.videoHeight || 480;
+
+  let results;
+  try {
+    results = state.landmarker.detectForVideo(videoEl, performance.now());
+  } catch {
+    return null;
+  }
+
+  if (!results.faceLandmarks || results.faceLandmarks.length === 0) return null;
+
+  const lm = results.faceLandmarks[0]; // 478 landmarks
+
+  // Escalar: x *= W, y *= H, z *= W (profundidade em unidades de W)
+  const pts = lm.map(p => ({ x: p.x * W, y: p.y * H, z: p.z * W }));
+
+  // Normalizar:
+  // 1. Centralizar no nariz (landmark 1)
+  const nose = pts[1];
+  const centered = pts.map(p => ({
+    x: p.x - nose.x,
+    y: p.y - nose.y,
+    z: p.z - nose.z,
+  }));
+
+  // 2. Escalar pela distância entre olhos (landmark 33 ↔ 263)
+  const eye_l = centered[33];
+  const eye_r = centered[263];
+  const eyeDist = Math.sqrt(
+    (eye_l.x - eye_r.x)**2 +
+    (eye_l.y - eye_r.y)**2 +
+    (eye_l.z - eye_r.z)**2
+  );
+  if (eyeDist < 1e-6) return null;
+
+  const norm = centered.map(p => [p.x / eyeDist, p.y / eyeDist, p.z / eyeDist]);
+
+  // Flat array: [x0, y0, z0, x1, y1, z1, ...]
+  return norm.flat();
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 4. TAB: CADASTRAR ROSTO
+// ════════════════════════════════════════════════════════════════════════
+
+const TOTAL_SAMPLES = 5;
+const SAMPLE_INTERVAL_MS = 500;
+
+function updateDotsUI() {
+  const n = state.registerSamples.length;
+  UI.samplesCountLabel.textContent = `${n} / ${TOTAL_SAMPLES}`;
+  UI.samplesDots.forEach((dot, i) => {
+    dot.className = 'dot';
+    if (i < n)          dot.classList.add('filled');
+    else if (i === n)   dot.classList.add('current');
+  });
+}
+
+function setRegisterFeedback(msg, type = '') {
+  UI.registerFeedback.textContent = msg;
+  UI.registerFeedback.className = 'feedback-box ' + type;
+}
+
+async function startRegisterCapture() {
+  const name = UI.inputName.value.trim();
+  if (!name) {
+    setRegisterFeedback('⚠ Informe o nome antes de capturar.', 'warn');
+    UI.inputName.focus();
+    return;
+  }
+  if (!state.modelReady) {
+    setRegisterFeedback('⚠ Aguarde o modelo carregar.', 'warn');
+    return;
+  }
+
+  state.registerSamples = [];
+  state.isCapturing = true;
+  UI.btnStartRegister.disabled = true;
+  UI.scanLineReg.style.display = 'block';
+  updateDotsUI();
+
+  for (let i = 0; i < TOTAL_SAMPLES; i++) {
+    setRegisterFeedback(`📸 Capturando amostra ${i+1} de ${TOTAL_SAMPLES}...`);
+    UI.regOverlayLabel.textContent = `Capturando ${i+1}/${TOTAL_SAMPLES}`;
+
+    // Tentar capturar com retries
+    let vec = null;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      vec = detectAndExtract(UI.videoRegister);
+      if (vec) break;
+      await sleep(100);
+    }
+
+    if (!vec) {
+      setRegisterFeedback(`✗ Rosto não detectado na amostra ${i+1}. Posicione o rosto e tente novamente.`, 'err');
+      UI.btnStartRegister.disabled = false;
+      state.isCapturing = false;
+      UI.scanLineReg.style.display = 'none';
+      UI.regOverlayLabel.textContent = 'Posicione o rosto no centro';
+      return;
+    }
+
+    state.registerSamples.push(vec);
+    updateDotsUI();
+
+    if (i < TOTAL_SAMPLES - 1) await sleep(SAMPLE_INTERVAL_MS);
+  }
+
+  // Enviar ao backend
+  setRegisterFeedback('💾 Salvando cadastro...');
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, samples: state.registerSamples }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setRegisterFeedback(`✓ ${data.msg}`, 'ok');
+      UI.regOverlayLabel.textContent = 'Cadastro concluído!';
+      loadUsers();
+    } else {
+      setRegisterFeedback('✗ Erro: ' + data.msg, 'err');
+    }
+  } catch (err) {
+    setRegisterFeedback('✗ Falha na comunicação com o servidor.', 'err');
+  }
+
+  state.isCapturing = false;
+  UI.btnStartRegister.disabled = false;
+  UI.scanLineReg.style.display = 'none';
+  setTimeout(() => { UI.regOverlayLabel.textContent = 'Posicione o rosto no centro'; }, 3000);
+}
+
+function clearRegister() {
+  state.registerSamples = [];
+  UI.inputName.value = '';
+  updateDotsUI();
+  setRegisterFeedback('Informe o nome e clique em "Iniciar Cadastro" para capturar as 5 amostras.');
+  UI.regOverlayLabel.textContent = 'Posicione o rosto no centro';
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 5. TAB: VERIFICAR ACESSO
+// ════════════════════════════════════════════════════════════════════════
+
+let currentThreshold = 0.06;
+
+function setVerifyFeedback(msg, type = '') {
+  UI.verifyFeedback.textContent = msg;
+  UI.verifyFeedback.className = 'feedback-box ' + type;
+  UI.verifyFeedback.classList.remove('hidden');
+}
+
+function updateDistBar(dist, threshold) {
+  const maxVis = Math.max(threshold * 3, 0.3);
+  const pct = Math.min((dist / maxVis) * 100, 100);
+  UI.distFill.style.width = pct + '%';
+  UI.distFill.className = 'dist-fill' + (dist > threshold ? ' over' : '');
+
+  const markerPct = Math.min((threshold / maxVis) * 100, 100);
+  UI.distMarker.style.left = markerPct + '%';
+  UI.distMarker.setAttribute('data-label', threshold.toFixed(3));
+}
+
+async function doVerify() {
+  if (!state.modelReady) {
+    setVerifyFeedback('⚠ Aguarde o modelo carregar.', 'warn');
+    return;
+  }
+
+  UI.scanLineVer.classList.remove('hidden');
+  UI.verOverlayLabel.textContent = 'Analisando...';
+  UI.btnVerify.disabled = true;
+  setVerifyFeedback('🔍 Detectando rosto...');
+
+  let vec = null;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    vec = detectAndExtract(UI.videoVerify);
+    if (vec) break;
+    await sleep(100);
+  }
+
+  if (!vec) {
+    setVerifyFeedback('✗ Rosto não detectado. Posicione o rosto na frente da câmera.', 'err');
+    UI.btnVerify.disabled = false;
+    UI.scanLineVer.classList.add('hidden');
+    UI.verOverlayLabel.textContent = 'Câmera pronta';
+    return;
+  }
+
+  setVerifyFeedback('📡 Consultando servidor...');
+  try {
+    const res = await fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sample: vec }),
+    });
+    const data = await res.json();
+
+    currentThreshold = data.threshold ?? 0.06;
+    UI.sidebarThreshold.textContent = currentThreshold;
+    UI.metricThreshold.textContent = currentThreshold.toFixed(4);
+
+    if (data.access) {
+      // ACESSO LIBERADO
+      UI.resultDisplay.className = 'result-display access-granted';
+      UI.resultIcon.textContent = '✓';
+      UI.resultIcon.className = 'result-icon granted';
+      UI.resultTitle.textContent = 'Acesso Liberado';
+      UI.resultTitle.className = 'granted';
+      UI.resultSubtitle.textContent = data.name || 'Pessoa reconhecida';
+      setVerifyFeedback(`✓ ${data.name} reconhecido(a)!`, 'ok');
+    } else {
+      // ACESSO NEGADO
+      UI.resultDisplay.className = 'result-display access-denied';
+      UI.resultIcon.textContent = '✗';
+      UI.resultIcon.className = 'result-icon denied';
+      UI.resultTitle.textContent = 'Acesso Negado';
+      UI.resultTitle.className = 'denied';
+      UI.resultSubtitle.textContent = data.distance != null
+        ? `Nenhuma correspondência encontrada`
+        : 'Nenhum usuário cadastrado';
+      setVerifyFeedback('✗ Acesso negado — pessoa não cadastrada.', 'err');
+    }
+
+    // Mostrar métricas
+    if (data.distance != null) {
+      UI.metricsSection.style.display = 'flex';
+      UI.metricsSection.style.flexDirection = 'column';
+      UI.metricsSection.style.gap = '8px';
+      UI.metricDistance.textContent = data.distance.toFixed(6);
+      updateDistBar(data.distance, currentThreshold);
+    }
+
+  } catch (err) {
+    setVerifyFeedback('✗ Falha na comunicação com o servidor.', 'err');
+  }
+
+  UI.btnVerify.disabled = false;
+  UI.scanLineVer.classList.add('hidden');
+  UI.verOverlayLabel.textContent = 'Câmera pronta';
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 6. TAB: USUÁRIOS
+// ════════════════════════════════════════════════════════════════════════
+
+async function loadUsers() {
+  UI.usersLoading.classList.remove('hidden');
+  UI.usersEmpty.classList.add('hidden');
+  UI.usersList.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+    const users = data.users || [];
+
+    UI.usersBadge.textContent = users.length;
+    UI.usersLoading.classList.add('hidden');
+
+    if (users.length === 0) {
+      UI.usersEmpty.classList.remove('hidden');
+    } else {
+      UI.usersList.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          ${users.map(u => `
+            <div class="user-item">
+              <div class="user-avatar">${escHtml(u.name.charAt(0).toUpperCase())}</div>
+              <div style="flex:1;">
+                <div class="user-name">${escHtml(u.name)}</div>
+                <div class="user-meta">${u.samples} amostra${u.samples !== 1 ? 's' : ''} ✨ Ativo</div>
+              </div>
+              <button class="btn-delete-user" data-name="${escHtml(u.name)}" title="Apagar ${escHtml(u.name)}">
+                🗑️ Apagar
+              </button>
+            </div>
+          `).join('')}
+        </div>
+        <div style="margin-top:20px; padding-top:16px; border-top:1.5px dashed var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:var(--text-secondary); font-weight:600;">
+            Total cadastrado: <strong>${users.length}</strong> pessoa${users.length !== 1 ? 's' : ''} 🌸
+          </span>
+          <button id="btn-delete-all" class="btn-delete-all">
+            🗑️ Apagar todos
+          </button>
+        </div>
+      `;
+
+      // Event listeners para apagar individualmente
+      UI.usersList.querySelectorAll('.btn-delete-user').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const name = btn.dataset.name;
+          if (confirm(`Apagar o cadastro de ${name}?`)) {
+            try {
+              const res = await fetch(`/api/users/${encodeURIComponent(name)}`, { method: 'DELETE' });
+              const result = await res.json().catch(() => ({}));
+              if (res.ok && result.ok) {
+                await loadUsers();
+              } else {
+                alert(result.msg || `Erro ao apagar ${name} (Status ${res.status})`);
+              }
+            } catch (err) {
+              alert('Erro de conexão ao tentar apagar usuário: ' + (err.message || err));
+            }
+          }
+        });
+      });
+
+      // Event listener para apagar todos
+      const btnDeleteAll = document.getElementById('btn-delete-all');
+      if (btnDeleteAll) {
+        btnDeleteAll.addEventListener('click', async () => {
+          if (confirm('Tem certeza que deseja apagar TODOS os cadastros? Esta ação não pode ser desfeita.')) {
+            try {
+              const res = await fetch('/api/users', { method: 'DELETE' });
+              const result = await res.json().catch(() => ({}));
+              if (res.ok && result.ok) {
+                await loadUsers();
+              } else {
+                alert(result.msg || `Erro ao apagar todos os usuários (Status ${res.status})`);
+              }
+            } catch (err) {
+              alert('Erro de conexão ao tentar apagar todos: ' + (err.message || err));
+            }
+          }
+        });
+      }
+
+      UI.usersList.classList.remove('hidden');
+    }
+  } catch (err) {
+    console.error('Erro ao carregar usuários:', err);
+    UI.usersLoading.classList.add('hidden');
+    UI.usersEmpty.classList.remove('hidden');
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 7. NAVEGAÇÃO ENTRE ABAS
+// ════════════════════════════════════════════════════════════════════════
+
+function navigateTo(tabId) {
+  document.querySelectorAll('.tab-view').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const targetView = $('tab-' + tabId);
+  const targetNav = $('nav-' + tabId);
+  if (targetView) targetView.classList.add('active');
+  if (targetNav) targetNav.classList.add('active');
+
+  if (tabId === 'users') loadUsers();
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => navigateTo(btn.dataset.tab));
+});
+
+// ════════════════════════════════════════════════════════════════════════
+// 8. TEMA CLARO / ESCURO
+// ════════════════════════════════════════════════════════════════════════
+
+const THEME_KEY = 'facegate-theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const isDark = theme === 'dark';
+  const icon = document.getElementById('theme-toggle-icon');
+  const text = document.getElementById('theme-toggle-text');
+  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+  if (text) text.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch (e) {}
+}
+
+function initTheme() {
+  let savedTheme = null;
+  try {
+    savedTheme = localStorage.getItem(THEME_KEY);
+  } catch (e) {}
+
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    applyTheme(savedTheme);
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+
+  const toggleBtn = document.getElementById('btn-theme-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 9. EVENT LISTENERS
+// ════════════════════════════════════════════════════════════════════════
+
+UI.btnStartRegister.addEventListener('click', startRegisterCapture);
+UI.btnClearRegister.addEventListener('click', clearRegister);
+UI.btnVerify.addEventListener('click', doVerify);
+UI.btnRefreshUsers.addEventListener('click', loadUsers);
+
+UI.inputName.addEventListener('input', () => {
+  const hasName = UI.inputName.value.trim().length > 0;
+  UI.btnStartRegister.disabled = !(state.modelReady && hasName);
+});
+
+// ════════════════════════════════════════════════════════════════════════
+// 10. UTILITÁRIOS
+// ════════════════════════════════════════════════════════════════════════
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 11. INICIALIZAÇÃO
+// ════════════════════════════════════════════════════════════════════════
+
+initTheme();
+updateDotsUI();
+loadUsers();
+loadMediaPipe();
+
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 node_modules/
 __pycache__/
 *.pyc
+faces.json
+.venv/
 rostos*.json
 acessos*.json
 camera_modo.txt
