@@ -1,4 +1,4 @@
-# FaceGate — Reconhecimento Facial com MediaPipe
+# FaceGate ✿ — Reconhecimento Facial com MediaPipe
 
 Sistema de controle de acesso biométrico por geometria facial.  
 Detecção 100% no navegador via **MediaPipe Face Landmarker** (478 pontos 3D).  
